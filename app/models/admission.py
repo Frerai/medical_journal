@@ -1,23 +1,29 @@
-# An unused import Department is needed for the tables to create a relationship, otherwise SqlAlchemy will go NUTS.
-from typing import List
+from __future__ import annotations
 
-from app.models.department import Department
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
-from sqlalchemy import String
 from sqlalchemy import Table
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
 from app.database.session import Base
 
 
+# Create a Many-to-Many association table between admissions and doctors.
+admission_doctor_association = Table(
+    "admission_doctor_association", Base.metadata,
+    Column("admission_id", Integer, ForeignKey("admissions.id")),
+    Column("doctor_id", Integer, ForeignKey("doctors.id"))
+)
+
+
 class Admission(Base):
     __tablename__ = "admissions"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    department_id: Mapped[int] = mapped_column(ForeignKey("departments.id"))
-    department: Mapped[List["Department"]] = relationship(back_populates="admission")
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=False)
+    department_id = Column(Integer, ForeignKey("departments.id"), nullable=False)
+    doctors = relationship("Doctor", secondary=admission_doctor_association, back_populates="admissions")
 
+    patient = relationship("Patient", back_populates="admissions")
+    department = relationship("Department", back_populates="admissions")
