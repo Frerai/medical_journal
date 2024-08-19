@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    container_name: fastapi_app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8100 --reload
+    ports:
+      - "8100:8100"
+    depends_on:
+      - postgres_db
+    environment:
+      - DATABASE_HOSTNAME=POSTGRES_DB
+      - DATABASE_PORT=${DB_PORT}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_NAME=${DB_NAME}
+      - DATABASE_USERNAME=${DB_USERNAME}
+    volumes:
+      - .:/app
+    env_file: .env
+
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: postgres_database
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

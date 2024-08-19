@@ -4,7 +4,7 @@ from pydantic import Field
 class AdmissionCreate(BaseModel):
     patient_id: int = Field(..., gt=0, description="ID of patient to be admitted.")
     department_id: int = Field(..., gt=0, description="ID of Department assigned to this admission.")
-    doctor_ids: list[int] | None = Field(default=[], description="List of doctor(s) ID(s) assigned to this admission")
+    doctor_ids: list[int] = Field(default=[], description="List of doctor(s) ID(s) assigned to this admission")
 
     class ConfigDict:
         json_schema_extra = {
