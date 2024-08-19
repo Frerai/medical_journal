@@ -18,6 +18,24 @@ router = APIRouter()
 
 @router.post("/", response_model=Patient)
 def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
+    """
+    Create a new unique patient with the provided details.
+
+    Arguments:
+
+        patient: PatientCreate - An object containing the details of the patient to create.
+        db: Session - A database session for executing queries.
+
+    Example:
+
+        first_name: str = "Albert"
+        last_name: str = "Einstein"
+        social_security_number: str = "140379-1234"
+
+    Returns:
+
+        The created patient with its details.
+    """
     db_patient = crud_patient.get_patient_by_social_security_number(
         db,
         social_security_number=patient.social_security_number
@@ -32,11 +50,47 @@ def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=list[Patient])
 def read_patients(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """
+    Retrieve a list of patients, with optional pagination.
+
+    Arguments:
+
+        skip: int - The number of patients to skip (default is 0).
+        limit: int - The maximum number of patients to retrieve (default is 10).
+        db: Session - A callable database object representing a transaction.
+
+    Example:
+
+        skip: int = 0
+        limit: int = 10
+
+    Returns:
+
+        A list of patients, each containing their ID, name, and social security number if found,
+        otherwise an empty list.
+    """
     patients = crud_patient.get_patients(db, skip=skip, limit=limit)
     return patients
 
+
 @router.get("/{social_security_number}/doctors", response_model=list[Doctor])
-def read_patient_doctors(social_security_number: str, db: Session = Depends(get_db)):
+def read_doctors_for_patient(social_security_number: str, db: Session = Depends(get_db)):
+    """
+    Retrieve a list of doctors associated with a specific patient.
+
+    Arguments:
+
+        social_security_number: str - The unique identifier of the patient whose doctors are to be retrieved.
+        db: Session - A callable database object representing a transaction.
+
+    Example:
+
+        social_security_number: str = "170381-2234"
+
+    Returns:
+
+        A list of doctors associated with the specified patient.
+    """
     doctors = crud_patient.get_doctors_for_patient(db, social_security_number=social_security_number)
     if not doctors:
         raise HTTPException(status_code=404, detail="Patient or Doctors not found")
